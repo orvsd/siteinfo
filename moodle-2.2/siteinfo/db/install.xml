@@ -18,7 +18,8 @@
         <FIELD NAME="adminusers" TYPE="int" LENGTH="8" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="totalusers" NEXT="teachers"/>
         <FIELD NAME="teachers" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="adminusers" NEXT="activeusers"/>
         <FIELD NAME="activeusers" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="teachers" NEXT="totalcourses"/>
-        <FIELD NAME="totalcourses" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="activeusers" NEXT="timemodified"/>
+        <FIELD NAME="totalcourses" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="activeusers" NEXT="courses"/>
+        <FIELD NAME="courses" TYPE="char" LENGTH="1024" NOTNULL="false" SEQUENCE="false" PREVIOUS="totalcourses" NEXT="timemodified"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="totalcourses"/>
       </FIELDS>
       <KEYS>

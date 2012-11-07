@@ -45,7 +45,17 @@ function siteinfo_init_db() {
     $siteinfo->adminusers   = intval($CFG->siteadmins);
     $siteinfo->teachers     = 0;
     $siteinfo->activeusers  = 0;
-    $siteinfo->totalcourses = 0;
+    $courselist = siteinfo_courselist();
+    $courselist_string = '';
+
+    if ($courselist && count($courselist) > 0) {
+      foreach($courselist as $id => $courseid) {
+        $courselist_string .= ',' . $courseid;
+      }
+    }
+
+    $siteinfo->totalcourses = count($courselist);
+    $siteinfo->courses = $courselist_string;
     $siteinfo->timemodified = time();
 
   //  try {
@@ -79,7 +89,17 @@ function siteinfo_update_db() {
     $siteinfo->adminusers   = intval($CFG->siteadmins);
     $siteinfo->teachers     = 0;
     $siteinfo->activeusers  = 0;
-    $siteinfo->totalcourses = 0;
+    $courselist = siteinfo_courselist();
+    $courselist_string = '';
+
+    if ($courselist && count($courselist) > 0) {
+      foreach($courselist as $id => $courseid) {
+        $courselist_string .= ',' . $courseid;
+      }
+    }
+
+    $siteinfo->totalcourses = count($courselist);
+    $siteinfo->courses = $courselist_string;
     $siteinfo->timemodified = time();
 
     try {
@@ -122,10 +142,19 @@ function siteinfo_usercount($role, $timeframe) {
 }
 
 /**
- * Count courses
- * @return int
+ * generate list of courses installed here
+ * @return array
  * @TODO: write this function 
  */
-function siteinfo_coursecount() {
-
+function siteinfo_courselist() {
+  // get all course idnumbers
+  $table = 'course';
+  $select = 'format != "site"';
+  $params = null;
+  $sort = 'id';
+  $fields = 'id,idnumber';
+  return $DB->get_records_select_menu($table,$select,$params,$sort,$fields);
 }
+
+
+
