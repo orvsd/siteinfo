@@ -20,7 +20,7 @@
         <FIELD NAME="activeusers" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="teachers" NEXT="totalcourses"/>
         <FIELD NAME="totalcourses" TYPE="int" LENGTH="8" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="activeusers" NEXT="courses"/>
         <FIELD NAME="courses" TYPE="char" LENGTH="1024" NOTNULL="false" SEQUENCE="false" PREVIOUS="totalcourses" NEXT="timemodified"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="totalcourses"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courses"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

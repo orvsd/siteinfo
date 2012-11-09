@@ -33,6 +33,23 @@ defined('MOODLE_INTERNAL') || die;
 function siteinfo_init_db() {
     global $CFG, $DB, $SITE;
 
+    // timeframe - default is within the last month, 
+    // i.e time() - 2592000 seconds (30 days)
+    // other options:
+    // in the last week = time() - 604800
+    $timeframe = time() - 2592000;
+    
+    // teachers = regular and non-editing teachers
+    $teachers = siteinfo_usercount(3,null) + siteinfo_usercount(4,null);
+    
+    $courselist = siteinfo_courselist();
+    $courselist_string = '';
+
+    if (count($courselist) > 0) {
+     print "courselist and count > 0";
+     $courselist_string = implode(',', $courselist);
+    }
+
     $siteinfo = new stdClass();
     $siteinfo->baseurl      = $CFG->wwwroot;
     $siteinfo->basepath     = $CFG->dirroot;
@@ -43,21 +60,12 @@ function siteinfo_init_db() {
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
-    $siteinfo->teachers     = 0;
-    $siteinfo->activeusers  = 0;
-    $courselist = siteinfo_courselist();
-    $courselist_string = '';
-
-    if ($courselist && count($courselist) > 0) {
-      foreach($courselist as $id => $courseid) {
-        $courselist_string .= ',' . $courseid;
-      }
-    }
-
+    $siteinfo->teachers     = $teachers;
+    $siteinfo->activeusers  = siteinfo_usercount(null, $timeframe);
     $siteinfo->totalcourses = count($courselist);
-    $siteinfo->courses = $courselist_string;
+    $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
-
+    
   //  try {
         $DB->insert_record('siteinfo', $siteinfo);
    // } catch (Exception $e) {
@@ -75,6 +83,22 @@ function siteinfo_init_db() {
  */
 function siteinfo_update_db() {
     global $CFG, $DB, $SITE;
+    // timeframe - default is within the last month, 
+    // i.e time() - 2592000 seconds (30 days)
+    // other options:
+    // in the last week = time() - 604800
+    $timeframe = time() - 2592000;
+    
+    // teachers = regular and non-editing teachers
+    $teachers = siteinfo_usercount(3,null) + siteinfo_usercount(4,null);
+    
+    $courselist = siteinfo_courselist();
+    $courselist_string = '';
+
+    if (count($courselist) > 0) {
+     print "courselist and count > 0";
+     $courselist_string = implode(',', $courselist);
+    }
 
     $siteinfo = new stdClass();
     $siteinfo->id           = 1;
@@ -87,19 +111,10 @@ function siteinfo_update_db() {
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
-    $siteinfo->teachers     = 0;
-    $siteinfo->activeusers  = 0;
-    $courselist = siteinfo_courselist();
-    $courselist_string = '';
-
-    if ($courselist && count($courselist) > 0) {
-      foreach($courselist as $id => $courseid) {
-        $courselist_string .= ',' . $courseid;
-      }
-    }
-
+    $siteinfo->teachers     = $teachers;
+    $siteinfo->activeusers  = siteinfo_usercount(null, $timeframe);
     $siteinfo->totalcourses = count($courselist);
-    $siteinfo->courses = $courselist_string;
+    $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
 
     try {
@@ -115,26 +130,39 @@ function siteinfo_update_db() {
  * Count users
  * @return int
  */
-function siteinfo_usercount($role, $timeframe) {
+function siteinfo_usercount($role=null, $timeframe=null) {
     global $CFG, $DB;
     /* @TODO: add logic to extract the number of users in a particular role
-        i.e. teacher, and users who have logged in within some timeframe
-    
-        if(role) {
-            sql = (sql to join the roles table and count the users with this role)
-        } else {
-            sql = (same as below, just count all the non-deleted users)
-        }
+      i.e. teacher, and users who have logged in within some timeframe
+      roles:
+      1: Manager, 2: Course creator, 3: Teacher, 4: Non-editing teacher
+      5: Student, 6: Guest, 7: Authenticated user, 
+      8: Authenticated user on frontpage
+      $timeframe is a unix timestamp
+     */
 
-        if (timeframe) {
-            sql += (append WHERE clause to sql to limit by activity date)
-        }
-    */
+    if ($timeframe) {
+      //sql += (append WHERE clause to sql to limit by activity date)
+      $where = "AND mdl_user.lastaccess > $timeframe";
+    } else {
+      $where = '';
+    }
 
-    $sql = "SELECT COUNT(*) 
-              FROM mdl_user
-             WHERE mdl_user.deleted = 0
-               AND mdl_user.confirmed = 1;";
+    if($role) {
+      $sql = "SELECT COUNT(DISTINCT userid)
+              FROM mdl_role_assignments
+              LEFT JOIN mdl_user
+              ON mdl_user.id = mdl_role_assignments.userid
+              WHERE mdl_role_assignments.roleid = $role
+              $where";
+
+    } else {
+      $sql = "SELECT COUNT(*) 
+                FROM mdl_user
+               WHERE mdl_user.deleted = 0
+               AND mdl_user.confirmed = 1
+               $where";
+    }
 
     $count = $DB->count_records_sql($sql, null);
 
@@ -147,13 +175,15 @@ function siteinfo_usercount($role, $timeframe) {
  * @TODO: write this function 
  */
 function siteinfo_courselist() {
+  global $CFG, $DB;
   // get all course idnumbers
   $table = 'course';
   $select = 'format != "site"';
   $params = null;
   $sort = 'id';
   $fields = 'id,idnumber';
-  return $DB->get_records_select_menu($table,$select,$params,$sort,$fields);
+  $list = $DB->get_records_select_menu($table,$select,$params,$sort,$fields);
+  return $list;
 }
 
 
