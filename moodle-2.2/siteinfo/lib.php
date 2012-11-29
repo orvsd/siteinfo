@@ -54,7 +54,7 @@ function siteinfo_init_db() {
     $siteinfo->baseurl      = $CFG->wwwroot;
     $siteinfo->basepath     = $CFG->dirroot;
     $siteinfo->sitename     = $SITE->fullname;
-    $siteinfo->sitetype     = "Moodle";
+    $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
     $siteinfo->adminemail   = $CFG->supportemail;
