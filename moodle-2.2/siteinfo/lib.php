@@ -40,13 +40,12 @@ function siteinfo_init_db() {
     $timeframe = time() - 2592000;
     
     // teachers = regular and non-editing teachers
-    $teachers = siteinfo_usercount(3,null) + siteinfo_usercount(4,null);
+    $teachers = siteinfo_usercount("teacher",null);
     
     $courselist = siteinfo_courselist();
     $courselist_string = '';
 
     if (count($courselist) > 0) {
-     print "courselist and count > 0";
      $courselist_string = implode(',', $courselist);
     }
 
@@ -66,12 +65,7 @@ function siteinfo_init_db() {
     $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
     
-  //  try {
-        $DB->insert_record('siteinfo', $siteinfo);
-   // } catch (Exception $e) {
-        //echo 'Caught exception: ',  $e->getMessage(), "\n";
-    //    return false;
-   // }
+    $DB->insert_record('siteinfo', $siteinfo);
 
     return true;
 }
@@ -90,13 +84,12 @@ function siteinfo_update_db() {
     $timeframe = time() - 2592000;
     
     // teachers = regular and non-editing teachers
-    $teachers = siteinfo_usercount(3,null) + siteinfo_usercount(4,null);
+    $teachers = siteinfo_usercount("teacher",null);
     
     $courselist = siteinfo_courselist();
     $courselist_string = '';
 
     if (count($courselist) > 0) {
-     print "courselist and count > 0";
      $courselist_string = implode(',', $courselist);
     }
 
@@ -105,7 +98,7 @@ function siteinfo_update_db() {
     $siteinfo->baseurl      = $CFG->wwwroot;
     $siteinfo->basepath     = $CFG->dirroot;
     $siteinfo->sitename     = $SITE->fullname;
-    $siteinfo->sitetype     = "Moodle";
+    $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
     $siteinfo->adminemail   = $CFG->supportemail;
@@ -130,7 +123,7 @@ function siteinfo_update_db() {
  * Count users
  * @return int
  */
-function siteinfo_usercount($role=null, $timeframe=null) {
+function siteinfo_usercount($role="none", $timeframe=null) {
     global $CFG, $DB;
     /* @TODO: add logic to extract the number of users in a particular role
       i.e. teacher, and users who have logged in within some timeframe
@@ -140,6 +133,32 @@ function siteinfo_usercount($role=null, $timeframe=null) {
       8: Authenticated user on frontpage
       $timeframe is a unix timestamp
      */
+
+    switch ($role) {
+      case "teacher":
+        $role_condition = "IN (3,4)";
+        break;
+      case "manager":
+        $role_condition = "= 1";
+        break;
+      case "course_creator":
+        $role_condition = "= 2";
+        break;
+      case "student":
+        $role_condition = "= 5";
+        break;
+      case "guest":
+        $role_condition = "= 6";
+        break;
+      case "authed":
+        $role_condition = "= 7";
+        break;
+      case "frontpage":
+        $role_condition = "= 8";
+        break;
+      default:
+        $role = false;
+    }
 
     if ($timeframe) {
       //sql += (append WHERE clause to sql to limit by activity date)
@@ -153,7 +172,7 @@ function siteinfo_usercount($role=null, $timeframe=null) {
               FROM mdl_role_assignments
               LEFT JOIN mdl_user
               ON mdl_user.id = mdl_role_assignments.userid
-              WHERE mdl_role_assignments.roleid = $role
+              WHERE mdl_role_assignments.roleid $role_condition
               $where";
 
     } else {
@@ -182,9 +201,32 @@ function siteinfo_courselist() {
   $params = null;
   $sort = 'id';
   $fields = 'id,idnumber';
-  $list = $DB->get_records_select_menu($table,$select,$params,$sort,$fields);
-  return $list;
+  $courses = $DB->get_records_select_menu($table,$select,$params,$sort,$fields);
+  $course_list = array();
+  foreach($courses as $id=>$course) {
+    if($course) {
+      $enrolled = siteinfo_get_enrolments($id);
+      $course_list[] = $course . ":" . $enrolled;
+    }
+  }
+  return $course_list;
 }
 
+/**
+ * Geti student enrollments for this course 
+ * @return array
+ * @TODO: write this function 
+ */
+function siteinfo_get_enrolments($courseid) {
+  global $CFG, $DB;
 
-
+  $sql = "select count(userid) 
+          from mdl_enrol
+          left join mdl_user_enrolments
+            on mdl_user_enrolments.enrolid=mdl_enrol.id
+          where mdl_enrol.roleid=5
+          and mdl_enrol.courseid=$courseid";
+  
+  $params = null;
+  return $DB->get_field_sql($sql,$params, IGNORE_MISSING);
+}

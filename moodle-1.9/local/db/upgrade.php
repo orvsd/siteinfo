@@ -25,10 +25,15 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-function xmldb_local_siteinfo_install() {
-    global $CFG;
-    
-  	require_once("$CFG->dirroot/local/siteinfo/lib.php");
+function xmldb_local_siteinfo_upgrade($oldversion = 0) {
+//  debugging('Upgrade');
+  global $CFG;
 
-    siteinfo_init_db();
+	require_once("$CFG->dirroot/local/siteinfo/lib.php");
+
+  siteinfo_update_db();
+  return true;
 }
+
+
+
