@@ -31,6 +31,7 @@ defined('MOODLE_INTERNAL') || die;
  */
 
 function siteinfo_init_db() {
+
     global $CFG, $DB, $SITE;
 
     // timeframe - default is within the last month, 
@@ -38,10 +39,14 @@ function siteinfo_init_db() {
     // other options:
     // in the last week = time() - 604800
     $timeframe = time() - 2592000;
-    
+
+    //print_r($CFG);
+
+    echo "get teachers"; 
     // teachers = regular and non-editing teachers
     $teachers = siteinfo_usercount("teacher",null);
     
+    echo "get courselist"; 
     $courselist = siteinfo_courselist();
     $courselist_string = '';
 
@@ -57,15 +62,18 @@ function siteinfo_init_db() {
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
     $siteinfo->adminemail   = $CFG->supportemail;
+    echo "get totalusers"; 
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
     $siteinfo->teachers     = $teachers;
+    echo "get activeusers"; 
     $siteinfo->activeusers  = siteinfo_usercount(null, $timeframe);
     $siteinfo->totalcourses = count($courselist);
     $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
     
-    $DB->insert_record('siteinfo', $siteinfo);
+    echo "insert record"; 
+    insert_record('siteinfo', $siteinfo);
 
     return true;
 }
@@ -76,7 +84,7 @@ function siteinfo_init_db() {
  * @return bool
  */
 function siteinfo_update_db() {
-    global $CFG, $DB, $SITE;
+    global $CFG, $SITE;
     // timeframe - default is within the last month, 
     // i.e time() - 2592000 seconds (30 days)
     // other options:
@@ -111,7 +119,7 @@ function siteinfo_update_db() {
     $siteinfo->timemodified = time();
 
     try {
-        $DB->update_record('siteinfo', $siteinfo);
+        update_record('siteinfo', $siteinfo);
     } catch (Exception $e) {
         //echo 'Caught exception: ',  $e->getMessage(), "\n";
         return false;
@@ -124,7 +132,7 @@ function siteinfo_update_db() {
  * @return int
  */
 function siteinfo_usercount($role="none", $timeframe=null) {
-    global $CFG, $DB;
+    global $CFG;
     /* @TODO: add logic to extract the number of users in a particular role
       i.e. teacher, and users who have logged in within some timeframe
       roles:
@@ -168,7 +176,7 @@ function siteinfo_usercount($role="none", $timeframe=null) {
     }
 
     if($role) {
-      $sql = "SELECT COUNT(DISTINCT userid)
+      $sql = "SELECT COUNT(*)
               FROM mdl_role_assignments
               LEFT JOIN mdl_user
               ON mdl_user.id = mdl_role_assignments.userid
@@ -183,7 +191,11 @@ function siteinfo_usercount($role="none", $timeframe=null) {
                $where";
     }
 
-    $count = $DB->count_records_sql($sql, null);
+    echo "execute user count query";
+
+    $count = count_records_sql($sql, null);
+
+    echo "blah!";
 
     return intval($count);
 }
@@ -194,14 +206,14 @@ function siteinfo_usercount($role="none", $timeframe=null) {
  * @TODO: write this function 
  */
 function siteinfo_courselist() {
-  global $CFG, $DB;
+  global $CFG;
   // get all course idnumbers
   $table = 'course';
   $select = 'format != "site"';
   $params = null;
   $sort = 'id';
   $fields = 'id,idnumber';
-  $courses = $DB->get_records_select_menu($table,$select,$params,$sort,$fields);
+  $courses = get_records_select_menu($table,$select,$params,$sort,$fields);
   $course_list = array();
   foreach($courses as $id=>$course) {
     if($course) {
@@ -218,7 +230,7 @@ function siteinfo_courselist() {
  * @TODO: write this function 
  */
 function siteinfo_get_enrolments($courseid) {
-  global $CFG, $DB;
+  global $CFG;
 
   $sql = "select count(userid) 
           from mdl_enrol
@@ -228,5 +240,5 @@ function siteinfo_get_enrolments($courseid) {
           and mdl_enrol.courseid=$courseid";
   
   $params = null;
-  return $DB->get_field_sql($sql,$params, IGNORE_MISSING);
+  return get_field_sql($sql,$params, IGNORE_MISSING);
 }
