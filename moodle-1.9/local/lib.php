@@ -34,19 +34,17 @@ function siteinfo_init_db() {
 
     global $CFG, $DB, $SITE;
 
+
     // timeframe - default is within the last month, 
     // i.e time() - 2592000 seconds (30 days)
     // other options:
     // in the last week = time() - 604800
     $timeframe = time() - 2592000;
 
-    //print_r($CFG);
 
-    echo "get teachers"; 
     // teachers = regular and non-editing teachers
     $teachers = siteinfo_usercount("teacher",null);
     
-    echo "get courselist"; 
     $courselist = siteinfo_courselist();
     $courselist_string = '';
 
@@ -62,17 +60,14 @@ function siteinfo_init_db() {
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
     $siteinfo->adminemail   = $CFG->supportemail;
-    echo "get totalusers"; 
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
     $siteinfo->teachers     = $teachers;
-    echo "get activeusers"; 
     $siteinfo->activeusers  = siteinfo_usercount(null, $timeframe);
     $siteinfo->totalcourses = count($courselist);
     $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
     
-    echo "insert record"; 
     insert_record('siteinfo', $siteinfo);
 
     return true;
@@ -133,14 +128,6 @@ function siteinfo_update_db() {
  */
 function siteinfo_usercount($role="none", $timeframe=null) {
     global $CFG;
-    /* @TODO: add logic to extract the number of users in a particular role
-      i.e. teacher, and users who have logged in within some timeframe
-      roles:
-      1: Manager, 2: Course creator, 3: Teacher, 4: Non-editing teacher
-      5: Student, 6: Guest, 7: Authenticated user, 
-      8: Authenticated user on frontpage
-      $timeframe is a unix timestamp
-     */
 
     switch ($role) {
       case "teacher":
@@ -191,11 +178,7 @@ function siteinfo_usercount($role="none", $timeframe=null) {
                $where";
     }
 
-    echo "execute user count query";
-
     $count = count_records_sql($sql, null);
-
-    echo "blah!";
 
     return intval($count);
 }
@@ -212,13 +195,13 @@ function siteinfo_courselist() {
   $select = 'format != "site"';
   $params = null;
   $sort = 'id';
-  $fields = 'id,idnumber';
-  $courses = get_records_select_menu($table,$select,$params,$sort,$fields);
+  $fields = 'id,shortname,idnumber';
+  $courses = get_records_select($table,$select);
   $course_list = array();
   foreach($courses as $id=>$course) {
     if($course) {
       $enrolled = siteinfo_get_enrolments($id);
-      $course_list[] = $course . ":" . $enrolled;
+      $course_list[] = "0" . ":" . $course->shortname . ":" . $enrolled;
     }
   }
   return $course_list;
@@ -232,12 +215,13 @@ function siteinfo_courselist() {
 function siteinfo_get_enrolments($courseid) {
   global $CFG;
 
-  $sql = "select count(userid) 
-          from mdl_enrol
-          left join mdl_user_enrolments
-            on mdl_user_enrolments.enrolid=mdl_enrol.id
-          where mdl_enrol.roleid=5
-          and mdl_enrol.courseid=$courseid";
+  $sql = "select count(mdl_role_assignments.userid) 
+          from mdl_role_assignments
+          left join mdl_context
+            on mdl_context.id = mdl_role_assignments.contextid
+          where mdl_context.contextlevel=50
+          and mdl_context.instanceid=$courseid
+          and mdl_role_assignments.roleid=5";
   
   $params = null;
   return get_field_sql($sql,$params, IGNORE_MISSING);
