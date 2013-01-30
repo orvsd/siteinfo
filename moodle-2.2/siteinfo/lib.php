@@ -125,14 +125,6 @@ function siteinfo_update_db() {
  */
 function siteinfo_usercount($role="none", $timeframe=null) {
     global $CFG, $DB;
-    /* @TODO: add logic to extract the number of users in a particular role
-      i.e. teacher, and users who have logged in within some timeframe
-      roles:
-      1: Manager, 2: Course creator, 3: Teacher, 4: Non-editing teacher
-      5: Student, 6: Guest, 7: Authenticated user, 
-      8: Authenticated user on frontpage
-      $timeframe is a unix timestamp
-     */
 
     switch ($role) {
       case "teacher":
@@ -191,31 +183,29 @@ function siteinfo_usercount($role="none", $timeframe=null) {
 /**
  * generate list of courses installed here
  * @return array
- * @TODO: write this function 
  */
 function siteinfo_courselist() {
   global $CFG, $DB;
   // get all course idnumbers
-  $table = 'course';
-  $select = 'format != "site"';
+  $table = 'coursemeta';
+  $conditions = null;
   $params = null;
-  $sort = 'id';
-  $fields = 'id,idnumber';
-  $courses = $DB->get_records_select_menu($table,$select,$params,$sort,$fields);
+  $sort = 'courseid';
+  $fields = 'courseid,shortname,serial';
+  $courses = $DB->get_records($table,$conditions,$sort,$fields);
+//  print_r($courses);
   $course_list = array();
-  foreach($courses as $id=>$course) {
-    if($course) {
-      $enrolled = siteinfo_get_enrolments($id);
-      $course_list[] = $course . ":" . $enrolled;
-    }
+  foreach($courses as $course) {
+      $enrolled = siteinfo_get_enrolments($course->courseid);
+      $course_list[] = $course->serial . ":" . htmlentities($course->shortname) . ":" . $enrolled;
   }
+
   return $course_list;
 }
 
 /**
  * Geti student enrollments for this course 
  * @return array
- * @TODO: write this function 
  */
 function siteinfo_get_enrolments($courseid) {
   global $CFG, $DB;
