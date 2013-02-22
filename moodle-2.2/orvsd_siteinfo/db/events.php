@@ -18,35 +18,35 @@
  * Defines events for the siteino plugin. These events will trigger
  * siteinfo database updates
  * @package    local
- * @subpackage siteinfo
- * @copyright  2012 Kenneth Lett (http://osuosl.org)
+ * @subpackage iorvsd_siteinfo
+ * @copyright  2013 OSU Open Source Lab (http://osuosl.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
-$libfile = $CFG->dirroot . '/local/siteinfo/lib.php';
+$libfile = $CFG->dirroot . '/local/orvsd_siteinfo/lib.php';
 
 $handlers = array (
     'user_deleted' => array (
          'handlerfile'      => $libfile,
-         'handlerfunction'  => 'siteinfo_update_db',
+         'handlerfunction'  => 'orvsd_siteinfo_update_db',
          'schedule'         => 'instant'
      ),
     'user_created' => array (
          'handlerfile'      => $libfile,
-         'handlerfunction'  => 'siteinfo_update_db',
+         'handlerfunction'  => 'orvsd_siteinfo_update_db',
          'schedule'         => 'instant'
      ),
     'course_created' => array (
          'handlerfile'      => $libfile,
-         'handlerfunction'  => 'siteinfo_update_db',
+         'handlerfunction'  => 'orvsd_siteinfo_update_db',
          'schedule'         => 'instant'
      ),
     'course_deleted' => array (
          'handlerfile'      => $libfile,
-         'handlerfunction'  => 'siteinfo_update_db',
+         'handlerfunction'  => 'orvsd_siteinfo_update_db',
          'schedule'         => 'instant'
     )
 );

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,13 +15,24 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * siteinfo admin settings
+ * siteinfo plugin install script
  *
  * @package    local
- * @subpackage siteinfo
- * @copyright  2012 Kenneth Lett (http://osuosl.org)
+ * @subpackage iorvsd_siteinfo
+ * @copyright  2013 OSU Open Source Lab (http://osuosl.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
+
+function xmldb_local_orvsd_siteinfo_upgrade($oldversion = 0) {
+    global $CFG;
+
+    require_once("$CFG->dirroot/local/orvsd_siteinfo/lib.php");
+
+    siteinfo_update_db();
+    return true;
+}
+
+
 

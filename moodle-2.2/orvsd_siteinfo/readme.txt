@@ -13,16 +13,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-copyright 2009 Petr Skoda (http://skodak.org)
+copyright 2013 OSU Open Source Lab (http://osuosl.org)
 license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 
+===============
+ORVSD Site Info
+===============
 
-Page module
-=============
+This plugin simply stores some site metadata in a table. Primarily
+this is for keeping track of site information of use to ORVSD.
 
-Page module is a successor to original 'html' and 'text' type plugins of Resource module.
+This plugin requires the ORVSD Coursemeta plugin
 
+-------
+INSTALL
+-------
 
-TODO:
- * implement portfolio support (MDL-20076)
- * new backup/restore and old restore migration (MDL-20077)
+Place the orvsd_siteinfo directory in local/ in your Moodle's
+webroot.  

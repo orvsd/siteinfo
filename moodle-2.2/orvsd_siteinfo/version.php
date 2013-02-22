@@ -15,22 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * siteinfo module capability definition
+ * siteinfo plugin version information
  *
  * @package    local
- * @subpackage siteinfo
- * @copyright  2012 Kenneth Lett (http://osuosl.org)
+ * @subpackage orvsd_siteinfo
+ * @copyright  2013 OSU Open Source Lab (http://osuosl.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
-    'mod/siteinfo:view' => array(
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'manager' => CAP_ALLOW
-        )
-    )
-);
+$plugin->version   = 2013022200;       // The current module version (Date: YYYYMMDDXX)
+$plugin->requires  = 2011120502;       // Requires this Moodle version
+$plugin->release = 1.0;
+$plugin->dependencies = array('local_orvsd_coursemeta' => ANY_VERSION); 

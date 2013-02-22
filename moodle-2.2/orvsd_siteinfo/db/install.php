@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * siteinfo plugin version information
+ * siteinfo plugin install script
  *
  * @package    local
  * @subpackage siteinfo
@@ -23,10 +23,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2013013003;       // The current module version (Date: YYYYMMDDXX)
-$plugin->requires  = 2011120502;       // Requires this Moodle version
-$plugin->release = 1.0;
-$plugin->dependencies = array('local_coursemeta' => ANY_VERSION); 
+function xmldb_local_orvsd_siteinfo_install() {
+    global $CFG;
+    
+  	require_once("$CFG->dirroot/local/orvsd_siteinfo/lib.php");
 
+    orvsd_siteinfo_init_db();
+    return true
+}

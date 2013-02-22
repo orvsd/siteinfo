@@ -18,8 +18,8 @@
  * siteinfo plugin function library 
  *
  * @package    local
- * @subpackage siteinfo
- * @copyright  2012 Kenneth Lett (http://osuosl.org)
+ * @subpackage orvsd_siteinfo
+ * @copyright  2013 OSU Open Source Lab (http://osuosl.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die;
  * @return bool
  */
 
-function siteinfo_init_db() {
+function orvsd_siteinfo_init_db() {
     global $CFG, $DB, $SITE;
 
     // timeframe - default is within the last month, 
@@ -46,7 +46,7 @@ function siteinfo_init_db() {
     $courselist_string = '';
 
     if (count($courselist) > 0) {
-     $courselist_string = implode(',', $courselist);
+     $courselist_string = implode('==', $courselist);
     }
 
     $siteinfo = new stdClass();
@@ -56,6 +56,7 @@ function siteinfo_init_db() {
     $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
+    $siteinfo->location     = gethostname();
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
@@ -75,7 +76,7 @@ function siteinfo_init_db() {
  * this will get called on certain events, see events.php
  * @return bool
  */
-function siteinfo_update_db() {
+function orvsd_siteinfo_update_db() {
     global $CFG, $DB, $SITE;
     // timeframe - default is within the last month, 
     // i.e time() - 2592000 seconds (30 days)
@@ -90,7 +91,7 @@ function siteinfo_update_db() {
     $courselist_string = '';
 
     if (count($courselist) > 0) {
-     $courselist_string = implode(',', $courselist);
+     $courselist_string = implode('==', $courselist);
     }
 
     $siteinfo = new stdClass();
@@ -101,6 +102,7 @@ function siteinfo_update_db() {
     $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
+    $siteinfo->location     = gethostname();
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
@@ -123,7 +125,7 @@ function siteinfo_update_db() {
  * Count users
  * @return int
  */
-function siteinfo_usercount($role="none", $timeframe=null) {
+function orvsd_siteinfo_usercount($role="none", $timeframe=null) {
     global $CFG, $DB;
 
     switch ($role) {
@@ -184,7 +186,7 @@ function siteinfo_usercount($role="none", $timeframe=null) {
  * generate list of courses installed here
  * @return array
  */
-function siteinfo_courselist() {
+function orvsd_siteinfo_courselist() {
   global $CFG, $DB;
   // get all course idnumbers
   $table = 'coursemeta';
@@ -197,7 +199,7 @@ function siteinfo_courselist() {
   $course_list = array();
   foreach($courses as $course) {
       $enrolled = siteinfo_get_enrolments($course->courseid);
-      $course_list[] = $course->serial . ":" . htmlentities($course->shortname) . ":" . $enrolled;
+      $course_list[] = $course->serial . "!!" . htmlentities($course->shortname) . "!!" . $enrolled;
   }
 
   return $course_list;
@@ -207,7 +209,7 @@ function siteinfo_courselist() {
  * Geti student enrollments for this course 
  * @return array
  */
-function siteinfo_get_enrolments($courseid) {
+function orvsd_siteinfo_get_enrolments($courseid) {
   global $CFG, $DB;
 
   $sql = "select count(userid) 
