@@ -45,12 +45,7 @@ function siteinfo_init_db() {
     // teachers = regular and non-editing teachers
     $teachers = siteinfo_usercount("teacher",null);
     
-    $courselist = siteinfo_courselist();
-    $courselist_string = '';
-
-    if (count($courselist) > 0) {
-     $courselist_string = implode(',', $courselist);
-    }
+    $courselist_string = siteinfo_courselist(); 
 
     $siteinfo = new stdClass();
     $siteinfo->baseurl      = $CFG->wwwroot;
@@ -59,6 +54,7 @@ function siteinfo_init_db() {
     $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
+    $siteinfo->location     = gethostname();
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
@@ -89,12 +85,7 @@ function siteinfo_update_db() {
     // teachers = regular and non-editing teachers
     $teachers = siteinfo_usercount("teacher",null);
     
-    $courselist = siteinfo_courselist();
-    $courselist_string = '';
-
-    if (count($courselist) > 0) {
-     $courselist_string = implode(',', $courselist);
-    }
+    $courselist_string = siteinfo_courselist(); 
 
     $siteinfo = new stdClass();
     $siteinfo->id           = 1;
@@ -104,6 +95,7 @@ function siteinfo_update_db() {
     $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
+    $siteinfo->location     = gethostname();
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
@@ -189,22 +181,31 @@ function siteinfo_usercount($role="none", $timeframe=null) {
  * @TODO: write this function 
  */
 function siteinfo_courselist() {
-  global $CFG;
-  // get all course idnumbers
-  $table = 'course';
-  $select = 'format != "site"';
-  $params = null;
-  $sort = 'id';
-  $fields = 'id,shortname,idnumber';
-  $courses = get_records_select($table,$select);
-  $course_list = array();
-  foreach($courses as $id=>$course) {
-    if($course) {
-      $enrolled = siteinfo_get_enrolments($id);
-      $course_list[] = "0" . ":" . $course->shortname . ":" . $enrolled;
+    global $CFG;
+    // get all course idnumbers
+    $table = 'course';
+    $select = 'format != "site"';
+    $params = null;
+    $sort = 'id';
+    $fields = 'id,shortname,idnumber';
+    $courses = get_records_select($table,$select);
+    $course_list = array();
+    foreach($courses as $id=>$course) {
+        if($course) {
+          $enrolled = siteinfo_get_enrolments($id);
+          $course_list[] = '{"serial":0"' . 
+                            '","shortname":"' . htmlentities($course->shortname) . 
+                            '","enrolled":' . $enrolled . '}';
+        }
     }
-  }
-  return $course_list;
+    $courselist_string = '';
+
+    if (count($course_list) > 0) {
+     $courselist_string = "[" . implode(',', $course_list) . "]";
+    }
+
+    return $courselist_string;
+
 }
 
 /**
