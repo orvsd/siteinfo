@@ -193,8 +193,8 @@ function siteinfo_courselist() {
     foreach($courses as $id=>$course) {
         if($course) {
           $enrolled = siteinfo_get_enrolments($id);
-          $course_list[] = '{"serial":0"' . 
-                            '","shortname":"' . htmlentities($course->shortname) . 
+          $course_list[] = '{"serial":"0",' . 
+                            '"shortname":"' . htmlentities($course->shortname) . 
                             '","enrolled":' . $enrolled . '}';
         }
     }
