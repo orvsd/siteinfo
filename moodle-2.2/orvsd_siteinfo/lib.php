@@ -40,14 +40,9 @@ function orvsd_siteinfo_init_db() {
     $timeframe = time() - 2592000;
     
     // teachers = regular and non-editing teachers
-    $teachers = siteinfo_usercount("teacher",null);
+    $teachers = orvsd_siteinfo_usercount("teacher",null);
     
-    $courselist = siteinfo_courselist();
-    $courselist_string = '';
-
-    if (count($courselist) > 0) {
-     $courselist_string = implode('==', $courselist);
-    }
+    $courselist_string = orvsd_siteinfo_courselist();
 
     $siteinfo = new stdClass();
     $siteinfo->baseurl      = $CFG->wwwroot;
@@ -58,10 +53,10 @@ function orvsd_siteinfo_init_db() {
     $siteinfo->siterelease  = $CFG->release;
     $siteinfo->location     = gethostname();
     $siteinfo->adminemail   = $CFG->supportemail;
-    $siteinfo->totalusers   = siteinfo_usercount(null, null);
+    $siteinfo->totalusers   = orvsd_siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
     $siteinfo->teachers     = $teachers;
-    $siteinfo->activeusers  = siteinfo_usercount(null, $timeframe);
+    $siteinfo->activeusers  = orvsd_siteinfo_usercount(null, $timeframe);
     $siteinfo->totalcourses = count($courselist);
     $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
@@ -85,14 +80,9 @@ function orvsd_siteinfo_update_db() {
     $timeframe = time() - 2592000;
     
     // teachers = regular and non-editing teachers
-    $teachers = siteinfo_usercount("teacher",null);
+    $teachers = orvsd_siteinfo_usercount("teacher",null);
     
-    $courselist = siteinfo_courselist();
-    $courselist_string = '';
-
-    if (count($courselist) > 0) {
-     $courselist_string = implode('==', $courselist);
-    }
+    $courselist_string = orvsd_siteinfo_courselist();
 
     $siteinfo = new stdClass();
     $siteinfo->id           = 1;
@@ -104,10 +94,10 @@ function orvsd_siteinfo_update_db() {
     $siteinfo->siterelease  = $CFG->release;
     $siteinfo->location     = gethostname();
     $siteinfo->adminemail   = $CFG->supportemail;
-    $siteinfo->totalusers   = siteinfo_usercount(null, null);
+    $siteinfo->totalusers   = orvsd_siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
     $siteinfo->teachers     = $teachers;
-    $siteinfo->activeusers  = siteinfo_usercount(null, $timeframe);
+    $siteinfo->activeusers  = orvsd_siteinfo_usercount(null, $timeframe);
     $siteinfo->totalcourses = count($courselist);
     $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
@@ -198,15 +188,24 @@ function orvsd_siteinfo_courselist() {
 //  print_r($courses);
   $course_list = array();
   foreach($courses as $course) {
-      $enrolled = siteinfo_get_enrolments($course->courseid);
-      $course_list[] = $course->serial . "!!" . htmlentities($course->shortname) . "!!" . $enrolled;
+      $shortname = preg_replace('/"/', '\'', $course->shortname);
+      $enrolled = orvsd_siteinfo_get_enrolments($course->courseid);
+      $course_list[] = '{"serial":"' . $course->serial . 
+                        '","shortname":"' . htmlentities($shortname) . 
+                        '","enrolled":' . $enrolled . '}';
   }
 
-  return $course_list;
+    $courselist_string = '';
+
+    if (count($course_list) > 0) {
+     $courselist_string = "[" . implode(',', $course_list) . "]";
+    }
+
+    return $courselist_string;
 }
 
 /**
- * Geti student enrollments for this course 
+ * Get student enrollments for this course 
  * @return array
  */
 function orvsd_siteinfo_get_enrolments($courseid) {
