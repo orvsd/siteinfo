@@ -54,7 +54,7 @@ function siteinfo_init_db() {
     $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
-    $siteinfo->location     = gethostname();
+    $siteinfo->location     = $hostname = php_uname('n');
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
@@ -95,7 +95,7 @@ function siteinfo_update_db() {
     $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
-    $siteinfo->location     = gethostname();
+    $siteinfo->location     = php_uname('n');
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
@@ -192,9 +192,12 @@ function siteinfo_courselist() {
     $course_list = array();
     foreach($courses as $id=>$course) {
         if($course) {
+          $shortname = preg_replace('/"/', '', $course->shortname);
+          $shortname = preg_replace("/'/", " ", $shortname);
+          $shortname = htmlentities($shortname);
           $enrolled = siteinfo_get_enrolments($id);
           $course_list[] = '{"serial":"0",' . 
-                            '"shortname":"' . htmlentities($course->shortname) . 
+                            '"shortname":"' . $shortname . 
                             '","enrolled":' . $enrolled . '}';
         }
     }
