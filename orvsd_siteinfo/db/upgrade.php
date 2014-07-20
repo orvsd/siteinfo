@@ -26,6 +26,8 @@
 defined('MOODLE_INTERNAL') || die;
 
 function xmldb_local_orvsd_siteinfo_upgrade($oldversion = 0) {
+	// TODO: Change upgrade.php to remove datbases created by pervious vesion
+	// 		 of plugin.
     global $CFG;
 
     require_once("$CFG->dirroot/local/orvsd_siteinfo/lib.php");

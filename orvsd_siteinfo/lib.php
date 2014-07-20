@@ -26,97 +26,117 @@
 defined('MOODLE_INTERNAL') || die;
 
 /**
- * Initialise the siteinfo table with this site's info
- * @return bool
- */
-
-function orvsd_siteinfo_init_db() {
-    global $CFG, $DB, $SITE;
-
-    // timeframe - default is within the last month, 
-    // i.e time() - 2592000 seconds (30 days)
-    // other options:
-    // in the last week = time() - 604800
-    $timeframe = time() - 2592000;
-    
-    // teachers = regular and non-editing teachers
-    $teachers = orvsd_siteinfo_usercount("teacher",null);
-    
-    $courselist_string = orvsd_siteinfo_courselist();
-
-    $siteinfo = new stdClass();
-    $siteinfo->baseurl      = $CFG->wwwroot;
-    $siteinfo->basepath     = $CFG->dirroot;
-    $siteinfo->sitename     = $SITE->fullname;
-    $siteinfo->sitetype     = "moodle";
-    $siteinfo->siteversion  = $CFG->version;
-    $siteinfo->siterelease  = $CFG->release;
-    $siteinfo->location     = php_uname('n'); 
-    $siteinfo->adminemail   = $CFG->supportemail;
-    $siteinfo->totalusers   = orvsd_siteinfo_usercount(null, null);
-    $siteinfo->adminusers   = intval($CFG->siteadmins);
-    $siteinfo->teachers     = $teachers;
-    $siteinfo->activeusers  = orvsd_siteinfo_usercount(null, $timeframe);
-    $siteinfo->totalcourses = count($courselist);
-    $siteinfo->courses      = $courselist_string;
-    $siteinfo->timemodified = time();
-    
-    $DB->insert_record('siteinfo', $siteinfo);
-
-    return true;
-}
-
-/**
- * Update the siteinfo table with this site's info
- * this will get called on certain events, see events.php
- * @return bool
- */
-function orvsd_siteinfo_update_db() {
-    global $CFG, $DB, $SITE;
-    // timeframe - default is within the last month, 
-    // i.e time() - 2592000 seconds (30 days)
-    // other options:
-    // in the last week = time() - 604800
-    $timeframe = time() - 2592000;
-    
-    // teachers = regular and non-editing teachers
-    $teachers = orvsd_siteinfo_usercount("teacher",null);
-    
-    $courselist_string = orvsd_siteinfo_courselist();
-
-    $siteinfo = new stdClass();
-    $siteinfo->id           = 1;
-    $siteinfo->baseurl      = $CFG->wwwroot;
-    $siteinfo->basepath     = $CFG->dirroot;
-    $siteinfo->sitename     = $SITE->fullname;
-    $siteinfo->sitetype     = "moodle";
-    $siteinfo->siteversion  = $CFG->version;
-    $siteinfo->siterelease  = $CFG->release;
-    $siteinfo->location     = php_uname('n');
-    $siteinfo->adminemail   = $CFG->supportemail;
-    $siteinfo->totalusers   = orvsd_siteinfo_usercount(null, null);
-    $siteinfo->adminusers   = intval($CFG->siteadmins);
-    $siteinfo->teachers     = $teachers;
-    $siteinfo->activeusers  = orvsd_siteinfo_usercount(null, $timeframe);
-    $siteinfo->totalcourses = count($courselist);
-    $siteinfo->courses      = $courselist_string;
-    $siteinfo->timemodified = time();
-
-    try {
-        $DB->update_record('siteinfo', $siteinfo);
-    } catch (Exception $e) {
-        //echo 'Caught exception: ',  $e->getMessage(), "\n";
-        return false;
-    }
-    return true;  
-}
-
-/**
  * Count users
  * @return int
  */
 function orvsd_siteinfo_usercount($role="none", $timeframe=null) {
     global $CFG, $DB;
+    
+    // This is the beginning of the code which was ripped out of 'createcourse' 
+    // Most of it seems to enable webservice functionality.
+    // The rest of this file has not changed at all.
+
+	// turn on webservices and make sure that the rest protocol is enabled
+	$ws_config = $DB->get_record('config', array('name'=>'enablewebservices'));
+	$protocols_config = $DB->get_record('config', array('name'=>'webservicesprotocols'));
+
+	if ($ws_config->value == 0)
+		echo "Web Services is off, turning it on now... ";
+		$ws_config->value = 1;
+		$success = $DB->update_record('config', $ws_config);
+		if($success) {
+			echo "Success!<br>";
+		} else {
+			echo "Failed!<br>";
+		}
+	}	
+
+	if (!$protocols_config) {
+		$protocols_config = new stdClass();
+		$protocols_config->name = 'webservicesprotocols';
+		$protocols_config->value = 'rest';
+		echo "Web Services REST protocol is not enabled, enabling now... ";
+		$success = $DB->insert_record('config', $protocols_config);
+		if ($success) {
+			echo "Success!<br>";
+		} else {
+			echo "Failed!<br>";
+		}
+
+	} else {
+		if(strpos($protocols_config->value, "rest") === false) {
+
+			echo "Web Services REST protocol is not enabled, enabling now... ";
+			$protocols_config->value .= ',rest';
+			$success = $DB->update_record('config', $protocols_config);
+
+			if ($success) {
+				echo "Success!<br>";
+			} else {
+				echo "Failed!<br>";
+			}
+		}
+	}
+
+	$service_id = $DB->get_field('external_services',
+	  'id', array('component'=>'local_orvsd'), IGNORE_MISSING);
+
+	if($service_id) {
+		echo "Site Info web service is already installed, updating... <br>";
+		$token_id = $DB->get_field('external_tokens',
+			'id', array('externalserviceid'=>$service_id), IGNORE MISSING);
+	} else {
+		echo "Create Course web service is not already installed, installing... <br>";
+		$token_id = false;
+	}
+
+	$external_token = new stdClass();
+	$external_token->token = "13f6df8a8b66742e02f7b3791710cf84"; //Change this!!
+	$external_token->tokentpe = 0;
+	$external_token->userid = 2;
+	$external_token->contextid = 1;
+	$external_token->creatorid = 2;
+	$external_token->iprestriction = "140.211.167.136/31,140.211.15.0/24,10.0.0.0/8";
+	// old ip restriction "127.0.0.1,10.0.2.0/8,192.168.33.0/8";
+	$external_token->validuntil = 0;
+	$external_token->timecreated = time();
+
+	if($service_id) {
+	  if($token_id) {
+		echo "Updating Site Info token for user Admin... <br>";
+		$external_token->externalserviceid = $service_id;
+		$external_token->id = $token_id;
+
+		try {
+			$DB->update_record('external_tokens', $external_token);
+		} catch (Exception $e) {
+			echo 'Caught exception: ', $e->getMessage(), "<br>";
+			return false;
+		}
+	  } else {
+		echo "Installing Create Course token for user Admin... <br>";
+		$external_token->externalserviceid = $service_id;
+		try {
+			$DB ->insert_record('external_tokens', $external_token);
+		} catch (Exception $e) {
+			return false;
+	  	}
+	  }
+	} else {
+	  $tmp = $DB->get_record_sql('SHOW TABLE STATUS WHERE name = "mdl_external_services"', null);
+
+	  $service_id = $tmp['mdl_external_services']->auto_increment;
+	  $external_token->externalserviceid = $service_id;
+	  echo "Installing Create Course token for user Admin... <br>";
+
+	try {
+		$DB->insert_record('external_tokens', $external_token);
+	  } catch (Exception $e) {
+		return false;
+	  }
+	}
+
+    //This is the end of the code which was taken out of 'CreateCourse'
 
     switch ($role) {
       case "teacher":
