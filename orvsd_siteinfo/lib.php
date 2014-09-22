@@ -91,7 +91,7 @@ function orvsd_siteinfo_usercount($role="none", $timeframe=null) {
 	}
 
 	$external_token = new stdClass();
-	$external_token->token = "13f6df8a8b66742e02f7b3791710cf84"; //Change this!!
+	$external_token->token = ""; //Change this!!
 	$external_token->tokentpe = 0;
 	$external_token->userid = 2;
 	$external_token->contextid = 1;
