@@ -26,6 +26,47 @@
 defined('MOODLE_INTERNAL') || die;
 
 /**
+ * Get the site's info and return as json string
+ * @param timeframe : user count within the last `timeframe` seconds
+ * @return string
+ */
+function orvsd_siteinfo_get_site_info($timeframe) {
+    global $CFG, $SITE;
+
+    // teachers = regular and non-editing teachers
+    $teachers = orvsd_siteinfo_usercount("teacher",null);
+    
+    $courselist_string = orvsd_siteinfo_courselist();
+
+    $siteinfo = new stdClass();
+    $siteinfo->baseurl      = $CFG->wwwroot;
+    $siteinfo->basepath     = $CFG->dirroot;
+    $siteinfo->sitename     = $SITE->fullname;
+    $siteinfo->sitetype     = "moodle";
+    $siteinfo->siteversion  = $CFG->version;
+    $siteinfo->siterelease  = $CFG->release;
+    $siteinfo->location     = php_uname('n'); 
+    $siteinfo->adminemail   = $CFG->supportemail;
+    $siteinfo->totalusers   = orvsd_siteinfo_usercount(null, null);
+    $siteinfo->adminusers   = intval($CFG->siteadmins);
+    $siteinfo->teachers     = $teachers;
+    $siteinfo->activeusers  = orvsd_siteinfo_usercount(null, $timeframe);
+    $siteinfo->totalcourses = count($courselist);
+    $siteinfo->courses      = $courselist_string;
+    $siteinfo->timemodified = time();
+    
+    /* We ignore using a database and just get the site info
+     * and format it to json and just return that
+     */
+
+    return json_encode($siteinfo);
+
+    //$DB->insert_record('siteinfo', $siteinfo);
+
+    //return true;
+}
+
+/**
  * generate list of courses installed here
  * @return array
  */
@@ -113,6 +154,11 @@ function orvsd_siteinfo_init_db() {
     $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
     
+    /* We need to ignore using a database and just get the site info
+     * and format it to a json format and just return that.
+     */
+
+
     $DB->insert_record('siteinfo', $siteinfo);
 
     return true;

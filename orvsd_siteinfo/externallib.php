@@ -18,17 +18,18 @@ class local_orvsd_siteinfo_external extends external_api {
    */
   public static function site_info_parameters() {
     return new external_function_parameters(
-      array('datetime'  => new external_value(PARAM_TEXT, 'How far back siteinfo should be collected from', VALUE_DEFAULT, 7))
+      array('datetime'  => new external_value(PARAM_TEXT, 'Count users within the last `n` days', VALUE_DEFAULT, 7))
     );
   }
 
   /**
    * Returns REST formatted site-info for a given time-period
-   * @return string siteinfo 
+   * @return string : siteinfo in json format.
    */
   public static function site_info($datetime) {
-    
-    global $CFG, $USER, $DB;
+  	global $CFG, $USER, $DB;
+    $datetime *= 86400; // 86400 seconds per day
+
     // Include the coursecat methods for creating the category
     require_once($CFG->libdir.'/coursecatlib.php');
     $siteinfo = null;
@@ -42,7 +43,11 @@ class local_orvsd_siteinfo_external extends external_api {
     $context = get_context_instance(CONTEXT_USER, $USER->id);
     self::validate_context($context);
 
-    $siteinfo = core_webservice_external::get_site_info();
+    // timeframe - default is within the last month, 
+    // i.e time() - 2592000 seconds (within the last 30 days)
+    // other options:
+    // in the last week = time() - 604800
+    $siteinfo = orvsd_siteinfo_get_site_info(time() - $datetime);
 
     if ($siteinfo > 0) {
       return $siteinfo; 
