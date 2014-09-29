@@ -56,7 +56,7 @@ class local_orvsd_siteinfo_external extends external_api {
     }
   }
 
-  public static function get_siteinfo_returns() {
+  public static function site_info_returns() {
     return new external_value(PARAM_TEXT, 'Site info.');
   }
 }

@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2014092301;       // The current module version (Date: YYYYMMDDXX)
+$plugin->version   = 2014092510;       // The current module version (Date: YYYYMMDDXX)
 $plugin->requires  = 2011120502;       // Requires this Moodle version
 $plugin->release = 1.1;
 $plugin->dependencies = array('local_orvsd_coursemeta' => ANY_VERSION); 

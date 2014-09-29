@@ -23,7 +23,7 @@
  */
 
 // we defined the webservice functions to install
-$function = array(
+$functions = array(
 	'local_orvsd_siteinfo_site_info' => array(
 		'classname'   => 'local_orvsd_siteinfo_external',
 		'methodname'  => 'site_info',
