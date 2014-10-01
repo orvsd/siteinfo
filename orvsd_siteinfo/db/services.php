@@ -24,9 +24,9 @@
 
 // we defined the webservice functions to install
 $functions = array(
-	'local_orvsd_siteinfo_site_info' => array(
+	'local_orvsd_siteinfo_siteinfo' => array(
 		'classname'   => 'local_orvsd_siteinfo_external',
-		'methodname'  => 'site_info',
+		'methodname'  => 'siteinfo',
 		'classpath'   => 'local/orvsd_siteinfo/externallib.php',
 		'description' => 'Given a number of days (e.g., 7) gives the site info from that far back until the present',
 		'type'	      => 'write',
@@ -36,7 +36,7 @@ $functions = array(
 // We define the services to install as pre-build services. A pre-build service is not editable by administrator.
 $services = array(
 	'Site Info' => array(
-		'functions' => array ('local_orvsd_siteinfo_site_info'),
+		'functions' => array ('local_orvsd_siteinfo_siteinfo'),
 		'restrictedusers' => 0,
 		'enabled'=>1,
 	),

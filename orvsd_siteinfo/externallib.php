@@ -16,7 +16,7 @@ class local_orvsd_siteinfo_external extends external_api {
    * Returns description of method parameters
    * @return external_function_parameters
    */
-  public static function site_info_parameters() {
+  public static function siteinfo_parameters() {
     return new external_function_parameters(
       array('datetime'  => new external_value(PARAM_TEXT, 'Count users within the last `n` days', VALUE_DEFAULT, 7))
     );
@@ -26,18 +26,18 @@ class local_orvsd_siteinfo_external extends external_api {
    * Returns REST formatted site-info for a given time-period
    * @return string : siteinfo in json format.
    */
-  public static function site_info($datetime) {
+  public static function siteinfo($datetime) {
   	global $CFG, $USER, $DB;
     $datetime *= 86400; // 86400 seconds per day
 
     // Include the coursecat methods for creating the category
     require_once($CFG->libdir.'/coursecatlib.php');
-    $siteinfo = null;
+    $sinfo = null;
 
     $param_array = array(
           'datetime' => $datetime
     );
-    $params = self::validate_parameters(self::site_info_parameters(), $param_array);
+    $params = self::validate_parameters(self::siteinfo_parameters(), $param_array);
 
     //Context validation
     $context = get_context_instance(CONTEXT_USER, $USER->id);
@@ -47,26 +47,110 @@ class local_orvsd_siteinfo_external extends external_api {
     // i.e time() - 2592000 seconds (within the last 30 days)
     // other options:
     // in the last week = time() - 604800
-    $siteinfo = local_orvsd_siteinfo_external::get_site_info($time() - $datetime);
+    $sinfo = local_orvsd_siteinfo_external::get_site_info(time() - $datetime);
 
-    return $siteinfo;
-  }
-
-  public static function site_info_returns() {
-    return new external_value(PARAM_TEXT, 'Site info.');
-  }
-  
-  // This function will do the actual 'site-info' tasks
-  // This decision was made for the sake of seperation of concerns
-  // $siteinfo_ouput = $time_param; is placeholder code to test the webservice
-  //    functionality so we don't get ahead of ourselves
-  public static function get_site_info($time_param){
-    $siteinfo_ouput = $time_param; 
-
-     if ($siteinfo_output > 0) {
-      return $siteinfo_output;
+    if ($sinfo > 0) {
+      return $sinfo; 
     } else {
       return "Siteinfo not found...";
     }
+  }
+
+  public static function siteinfo_returns() {
+    return new external_value(PARAM_TEXT, 'Site info.');
+  }
+
+  /**
+   * Get the site's info and return as json string
+   * @param timeframe : user count within the last `timeframe` seconds
+   * @return string
+   */
+  private static function get_site_info($timeframe) {
+      global $CFG, $SITE;
+
+      // teachers = regular and non-editing teachers
+      $teachers = local_orvsd_siteinfo_external::user_count("teacher",null);
+      
+      $courselist_string = orvsd_siteinfo_courselist();
+
+      $sinfo = new stdClass();
+      $sinfo->baseurl      = $CFG->wwwroot;
+      $sinfo->basepath     = $CFG->dirroot;
+      $sinfo->sitename     = $SITE->fullname;
+      $sinfo->sitetype     = "moodle";
+      $sinfo->siteversion  = $CFG->version;
+      $sinfo->siterelease  = $CFG->release;
+      $sinfo->location     = php_uname('n'); 
+      $sinfo->adminemail   = $CFG->supportemail;
+      $sinfo->totalusers   = local_orvsd_siteinfo_external::user_count(null, null);
+      $sinfo->adminusers   = intval($CFG->siteadmins);
+      $sinfo->teachers     = $teachers;
+      $sinfo->activeusers  = local_orvsd_siteinfo_external::user_count(null, $timeframe);
+      $sinfo->totalcourses = count($courselist);
+      $sinfo->courses      = $courselist_string;
+      $sinfo->timemodified = time();
+
+      return json_encode($sinfo);
+  }
+
+  /**
+   * Count users
+   * @return int
+   */
+  private static function user_count($role="none", $timeframe=null) {
+      global $CFG, $DB;
+
+      switch ($role) {
+        case "teacher":
+          $role_condition = "IN (3,4)";
+          break;
+        case "manager":
+          $role_condition = "= 1";
+          break;
+        case "course_creator":
+          $role_condition = "= 2";
+          break;
+        case "student":
+          $role_condition = "= 5";
+          break;
+        case "guest":
+          $role_condition = "= 6";
+          break;
+        case "authed":
+          $role_condition = "= 7";
+          break;
+        case "frontpage":
+          $role_condition = "= 8";
+          break;
+        default:
+          $role = false;
+      }
+
+      if ($timeframe) {
+        //sql += (append WHERE clause to sql to limit by activity date)
+        $where = "AND mdl_user.lastaccess > $timeframe";
+      } else {
+        $where = '';
+      }
+
+      if($role) {
+        $sql = "SELECT COUNT(DISTINCT userid)
+                FROM mdl_role_assignments
+                LEFT JOIN mdl_user
+                ON mdl_user.id = mdl_role_assignments.userid
+                WHERE mdl_role_assignments.roleid $role_condition
+                $where";
+
+      } else {
+        $sql = "SELECT COUNT(*) 
+                  FROM mdl_user
+                 WHERE mdl_user.deleted = 0
+                 AND mdl_user.confirmed = 1
+                 $where";
+      }
+
+      $count = $DB->count_records_sql($sql, null);
+
+      return intval($count);
   }
 }
