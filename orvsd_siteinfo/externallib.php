@@ -47,16 +47,26 @@ class local_orvsd_siteinfo_external extends external_api {
     // i.e time() - 2592000 seconds (within the last 30 days)
     // other options:
     // in the last week = time() - 604800
-    $siteinfo = orvsd_siteinfo_get_site_info(time() - $datetime);
+    $siteinfo = local_orvsd_siteinfo_external::get_site_info($time() - $datetime);
 
-    if ($siteinfo > 0) {
-      return $siteinfo; 
-    } else {
-      return "Siteinfo not found...";
-    }
+    return $siteinfo;
   }
 
   public static function site_info_returns() {
     return new external_value(PARAM_TEXT, 'Site info.');
+  }
+  
+  // This function will do the actual 'site-info' tasks
+  // This decision was made for the sake of seperation of concerns
+  // $siteinfo_ouput = $time_param; is placeholder code to test the webservice
+  //    functionality so we don't get ahead of ourselves
+  public static function get_site_info($time_param){
+    $siteinfo_ouput = $time_param; 
+
+     if ($siteinfo_output > 0) {
+      return $siteinfo_output;
+    } else {
+      return "Siteinfo not found...";
+    }
   }
 }
