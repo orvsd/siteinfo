@@ -16,7 +16,7 @@
 */
 
 /// SETUP - NEED TO BE CHANGED
-$token = 'c97b467849118653f5d0192961f34378';
+$token = '' //FILL THIS IN!!!
 $domainname = 'http://school27';
 $functionname = 'local_orvsd_siteinfo_siteinfo';
 

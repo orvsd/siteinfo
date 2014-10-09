@@ -9,6 +9,7 @@
  */
 
 require_once($CFG->libdir . "/externallib.php");
+require_once("$CFG->dirroot/local/orvsd_siteinfo/lib.php");
 
 class local_orvsd_siteinfo_external extends external_api {
 
@@ -49,11 +50,7 @@ class local_orvsd_siteinfo_external extends external_api {
     // in the last week = time() - 604800
     $sinfo = local_orvsd_siteinfo_external::get_site_info(time() - $datetime);
 
-    if ($sinfo > 0) {
-      return $sinfo; 
-    } else {
-      return "Siteinfo not found...";
-    }
+    return $sinfo; 
   }
 
   public static function siteinfo_returns() {
