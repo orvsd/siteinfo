@@ -6,21 +6,17 @@
 Moodle SiteInfo
 ===============
 
-Usage
------
+Usage and Development
+---------------------
 
 .. toctree::
    :maxdepth: 2
 
-Development
------------
-
-.. toctree::
-   :maxdepth: 2
+   usage
+   development
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
