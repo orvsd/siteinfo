@@ -1,6 +1,13 @@
 Development
 ===========
 
+This document is meant to help those who are going to contribute to / need to
+work with orvsd_central's moodle siteinfo codebase. The information is split 
+up based on files and may be organized based on what certain functions do and 
+may be information of certain variables. Everything is ultimately organized 
+based on what the OSL developers feel is most important to know diving into our
+code.
+
 lib.php
 -------
 **functions**

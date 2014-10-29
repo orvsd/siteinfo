@@ -6,6 +6,10 @@
 Moodle SiteInfo
 ===============
 
+The Moodle SiteInfo webservice is used by Orvsd Central to gather siteinfo for
+given Moodle Sites, information which is displayed on the 'Report' page= of 
+Orvsd Central.
+
 Usage and Development
 ---------------------
 
