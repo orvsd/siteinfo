@@ -3,8 +3,8 @@
  * ORVSD External Web Service
  * provides a facility to provide OSL managed moodle site's information
  *
- * @package		  orvsd
- * @copyright	  2012 OSU Open Soruce lab
+ * @package      orvsd
+ * @copyright    2012 OSU Open Soruce lab
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -28,7 +28,7 @@ class local_orvsd_siteinfo_external extends external_api {
    * @return string : siteinfo in json format.
    */
   public static function siteinfo($datetime) {
-  	global $CFG, $USER, $DB;
+    global $CFG, $USER, $DB;
     $datetime *= 86400; // 86400 seconds per day
 
     // Include the coursecat methods for creating the category
@@ -50,7 +50,7 @@ class local_orvsd_siteinfo_external extends external_api {
     // in the last week = time() - 604800
     $sinfo = local_orvsd_siteinfo_external::get_site_info(time() - $datetime);
 
-    return $sinfo; 
+    return $sinfo;
   }
 
   public static function siteinfo_returns() {
@@ -81,6 +81,7 @@ class local_orvsd_siteinfo_external extends external_api {
       $sinfo->adminemail   = $CFG->supportemail;
       $sinfo->totalusers   = local_orvsd_siteinfo_external::user_count(null, null);
       $sinfo->adminusers   = intval($CFG->siteadmins);
+      $sinfo->adminlist    = orvsd_siteinfo_get_admin_list();
       $sinfo->teachers     = $teachers;
       $sinfo->activeusers  = local_orvsd_siteinfo_external::user_count(null, $timeframe);
       $sinfo->totalcourses = count($courselist);
@@ -88,16 +89,16 @@ class local_orvsd_siteinfo_external extends external_api {
       $sinfo->timemodified = time();
 
       return json_encode($sinfo);
-  }
+    }
 
-  /**
-   * Count users
-   * @return int
-   */
-  private static function user_count($role="none", $timeframe=null) {
-      global $CFG, $DB;
+    /**
+     * Count users
+     * @return int
+     */
+    private static function user_count($role="none", $timeframe=null) {
+        global $CFG, $DB;
 
-      switch ($role) {
+        switch ($role) {
         case "teacher":
           $role_condition = "IN (3,4)";
           break;
@@ -121,7 +122,7 @@ class local_orvsd_siteinfo_external extends external_api {
           break;
         default:
           $role = false;
-      }
+        }
 
       if ($timeframe) {
         //sql += (append WHERE clause to sql to limit by activity date)

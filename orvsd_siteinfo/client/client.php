@@ -15,8 +15,86 @@
 * @authorr Jerome Mouneyrac
 */
 
+function spaces($num) {
+    $output = "";
+    for ($i = 0; $i < $num; ++$i) {
+        $output .= " ";
+    }
+    return $output;
+}
+
+/** For viewing or debugging the json_encoded output
+ ** in a human-readable format.
+ */
+function formatted_output($input) {
+    $prevchar = $input[0];
+    $char = $prevchar;
+    $input = substr($input, 1); // remove first character
+    $INDENT_SIZE = 4;
+    $output = "";
+    $indent = 0;
+    $line = "";
+    $char = '';
+    $in_fieldname = false;
+    $extracted_fieldname = false;
+    $char = $input[0];
+    for ($pos = 0; $pos < strlen($input); ++$pos) {
+        $prevchar = $char;
+        $char = $input[$pos];
+        if ($pos >= strlen($input))
+            $nextchar = '';
+        else
+            $nextchar = $input[$pos+1];
+        
+        if (in_array($char, ['{', '['])) {
+            $line .= $char."\n";
+            $output .= $line;
+            $indent += $INDENT_SIZE;
+            $line = spaces($indent);
+        }
+        else if (in_array($char, [','])) {
+            $line .= $char."\n";
+            $output .= $line;
+            $line = spaces($indent);
+        }
+        else if (in_array($char, [']', '}'])) {
+            $output .= $line."\n";
+            $indent -= $INDENT_SIZE;
+            $line = spaces($indent);
+            $line .= $char;
+        }
+        else if (in_array($char, ['\\'])) {
+            // do nothing
+        }
+        else if (in_array($char, ['"'])) {
+            if (in_array($nextchar, ['{', '['])) {
+                // do not add the double-quote "
+            }
+            else if (in_array($prevchar, ['}', ']'])) {
+                // do not add the double quote "
+            }
+            else if ($extracted_fieldname) {
+                $line .= $char;
+            }
+            else {
+                if ($in_fieldname) {
+                    $extracted_fieldname = true;
+                }
+                $line .= $char;
+            }
+        }
+        else {
+            $line .= $char;
+        }
+
+    }
+
+    return $output."}";
+
+}
+
 /// SETUP - NEED TO BE CHANGED
-$token = '' //FILL THIS IN!!!
+$token = ''; //FILL THIS IN!!!
 $domainname = 'http://school27';
 $functionname = 'local_orvsd_siteinfo_siteinfo';
 
@@ -28,7 +106,7 @@ $restformat = 'json'; //Also possible in Moodle 2.2 and later: 'json'
 
 /// PARAMETERS - NEED TO BE CHANGED IF YOU CALL A DIFFERENT FUNCTION
 
-$course1= array();
+$course1 = array();
 $course1['datetime'] = 14;
 $params = array('course1' => $course1);
 
@@ -44,4 +122,7 @@ $curl = new curl;
 
 $restformat = ($restformat == 'json') ? '&moodlewsrestformat=' . $restformat : '';
 $resp = $curl->post($serverurl . '&moodlewsrestformat=json', $course1);
-print_r($resp);
+print("\n\n");
+print($resp);
+print("\n\n");
+print(formatted_output($resp)."\n");
