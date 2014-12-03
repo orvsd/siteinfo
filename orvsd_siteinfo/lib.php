@@ -25,7 +25,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-
 /**
  * Get the comma-delimited array of users on the admin list.
  * The list includes first name, last name, and email-address.
@@ -50,91 +49,6 @@ function orvsd_siteinfo_get_admin_list() {
     return json_encode($result);
 }
 
-/**
- * Initialise the siteinfo table with this site's info
- * @return bool
- */
-
-function orvsd_siteinfo_init_db() {
-    global $CFG, $DB, $SITE;
-
-    // timeframe - default is within the last month,
-    // i.e time() - 2592000 seconds (30 days)
-    // other options:
-    // in the last week = time() - 604800
-    $timeframe = time() - 2592000;
-
-    // teachers = regular and non-editing teachers
-    $teachers = orvsd_siteinfo_usercount("teacher",null);
-
-    $courselist_string = orvsd_siteinfo_courselist();
-
-    $siteinfo = new stdClass();
-    $siteinfo->baseurl      = $CFG->wwwroot;
-    $siteinfo->basepath     = $CFG->dirroot;
-    $siteinfo->sitename     = $SITE->fullname;
-    $siteinfo->sitetype     = "moodle";
-    $siteinfo->siteversion  = $CFG->version;
-    $siteinfo->siterelease  = $CFG->release;
-    $siteinfo->location     = php_uname('n');
-    $siteinfo->adminemail   = $CFG->supportemail;
-    $siteinfo->totalusers   = orvsd_siteinfo_usercount(null, null);
-    $siteinfo->adminusers   = intval($CFG->siteadmins);
-    $siteinfo->teachers     = $teachers;
-    $siteinfo->activeusers  = orvsd_siteinfo_usercount(null, $timeframe);
-    $siteinfo->totalcourses = count($courselist);
-    $siteinfo->courses      = $courselist_string;
-    $siteinfo->timemodified = time();
-
-    $DB->insert_record('siteinfo', $siteinfo);
-
-    return true;
-}
-
-/**
- * Update the siteinfo table with this site's info
- * this will get called on certain events, see events.php
- * @return bool
- */
-function orvsd_siteinfo_update_db() {
-    global $CFG, $DB, $SITE;
-    // timeframe - default is within the last month,
-    // i.e time() - 2592000 seconds (30 days)
-    // other options:
-    // in the last week = time() - 604800
-    $timeframe = time() - 2592000;
-
-    // teachers = regular and non-editing teachers
-    $teachers = orvsd_siteinfo_usercount("teacher",null);
-
-    $courselist_string = orvsd_siteinfo_courselist();
-
-    $siteinfo = new stdClass();
-    $siteinfo->id           = 1;
-    $siteinfo->baseurl      = $CFG->wwwroot;
-    $siteinfo->basepath     = $CFG->dirroot;
-    $siteinfo->sitename     = $SITE->fullname;
-    $siteinfo->sitetype     = "moodle";
-    $siteinfo->siteversion  = $CFG->version;
-    $siteinfo->siterelease  = $CFG->release;
-    $siteinfo->location     = php_uname('n');
-    $siteinfo->adminemail   = $CFG->supportemail;
-    $siteinfo->totalusers   = orvsd_siteinfo_usercount(null, null);
-    $siteinfo->adminusers   = intval($CFG->siteadmins);
-    $siteinfo->teachers     = $teachers;
-    $siteinfo->activeusers  = orvsd_siteinfo_usercount(null, $timeframe);
-    $siteinfo->totalcourses = count($courselist);
-    $siteinfo->courses      = $courselist_string;
-    $siteinfo->timemodified = time();
-
-    try {
-        $DB->update_record('siteinfo', $siteinfo);
-    } catch (Exception $e) {
-        //echo 'Caught exception: ',  $e->getMessage(), "\n";
-        return false;
-    }
-    return true;
-}
 
 /**
  * Count users
@@ -197,6 +111,7 @@ function orvsd_siteinfo_usercount($role="none", $timeframe=null) {
     return intval($count);
 }
 
+
 /**
  * generate list of courses installed here
  * @return array
@@ -229,6 +144,7 @@ function orvsd_siteinfo_courselist() {
 
     return $courselist_string;
 }
+
 
 /**
  * Get student enrollments for this course
