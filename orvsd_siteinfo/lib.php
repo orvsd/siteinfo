@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * siteinfo plugin function library 
+ * siteinfo plugin function library
  *
  * @package    local
  * @subpackage orvsd_siteinfo
@@ -58,15 +58,15 @@ function orvsd_siteinfo_get_admin_list() {
 function orvsd_siteinfo_init_db() {
     global $CFG, $DB, $SITE;
 
-    // timeframe - default is within the last month, 
+    // timeframe - default is within the last month,
     // i.e time() - 2592000 seconds (30 days)
     // other options:
     // in the last week = time() - 604800
     $timeframe = time() - 2592000;
-    
+
     // teachers = regular and non-editing teachers
     $teachers = orvsd_siteinfo_usercount("teacher",null);
-    
+
     $courselist_string = orvsd_siteinfo_courselist();
 
     $siteinfo = new stdClass();
@@ -76,7 +76,7 @@ function orvsd_siteinfo_init_db() {
     $siteinfo->sitetype     = "moodle";
     $siteinfo->siteversion  = $CFG->version;
     $siteinfo->siterelease  = $CFG->release;
-    $siteinfo->location     = php_uname('n'); 
+    $siteinfo->location     = php_uname('n');
     $siteinfo->adminemail   = $CFG->supportemail;
     $siteinfo->totalusers   = orvsd_siteinfo_usercount(null, null);
     $siteinfo->adminusers   = intval($CFG->siteadmins);
@@ -85,7 +85,7 @@ function orvsd_siteinfo_init_db() {
     $siteinfo->totalcourses = count($courselist);
     $siteinfo->courses      = $courselist_string;
     $siteinfo->timemodified = time();
-    
+
     $DB->insert_record('siteinfo', $siteinfo);
 
     return true;
@@ -98,15 +98,15 @@ function orvsd_siteinfo_init_db() {
  */
 function orvsd_siteinfo_update_db() {
     global $CFG, $DB, $SITE;
-    // timeframe - default is within the last month, 
+    // timeframe - default is within the last month,
     // i.e time() - 2592000 seconds (30 days)
     // other options:
     // in the last week = time() - 604800
     $timeframe = time() - 2592000;
-    
+
     // teachers = regular and non-editing teachers
     $teachers = orvsd_siteinfo_usercount("teacher",null);
-    
+
     $courselist_string = orvsd_siteinfo_courselist();
 
     $siteinfo = new stdClass();
@@ -133,7 +133,7 @@ function orvsd_siteinfo_update_db() {
         //echo 'Caught exception: ',  $e->getMessage(), "\n";
         return false;
     }
-    return true;  
+    return true;
 }
 
 /**
@@ -185,7 +185,7 @@ function orvsd_siteinfo_usercount($role="none", $timeframe=null) {
               $where";
 
     } else {
-      $sql = "SELECT COUNT(*) 
+      $sql = "SELECT COUNT(*)
                 FROM mdl_user
                WHERE mdl_user.deleted = 0
                AND mdl_user.confirmed = 1
@@ -210,14 +210,14 @@ function orvsd_siteinfo_courselist() {
   $sort = 'courseid';
   $fields = 'courseid,shortname,serial';
   $courses = $DB->get_records($table,$conditions,$sort,$fields);
-//  print_r($courses);
+
   $course_list = array();
   foreach($courses as $course) {
       $shortname = preg_replace('/"/', '', $course->shortname);
       $shortname = preg_replace("/'/", " ", $shortname);
       $enrolled = orvsd_siteinfo_get_enrolments($course->courseid);
-      $course_list[] = '{"serial":"' . $course->serial . 
-                        '","shortname":"' . htmlentities($shortname) . 
+      $course_list[] = '{"serial":"' . $course->serial .
+                        '","shortname":"' . htmlentities($shortname) .
                         '","enrolled":' . $enrolled . '}';
   }
 
@@ -231,19 +231,19 @@ function orvsd_siteinfo_courselist() {
 }
 
 /**
- * Get student enrollments for this course 
+ * Get student enrollments for this course
  * @return array
  */
 function orvsd_siteinfo_get_enrolments($courseid) {
   global $CFG, $DB;
 
-  $sql = "select count(userid) 
+  $sql = "select count(userid)
           from mdl_enrol
           left join mdl_user_enrolments
             on mdl_user_enrolments.enrolid=mdl_enrol.id
           where mdl_enrol.roleid=5
           and mdl_enrol.courseid=$courseid";
-  
+
   $params = null;
   return $DB->get_field_sql($sql,$params, IGNORE_MISSING);
 }

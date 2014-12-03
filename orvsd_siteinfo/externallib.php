@@ -42,7 +42,7 @@ class local_orvsd_siteinfo_external extends external_api {
     $context = get_context_instance(CONTEXT_USER, $USER->id);
     self::validate_context($context);
 
-    // timeframe - default is within the last month, 
+    // timeframe - default is within the last month,
     // i.e time() - 2592000 seconds (within the last 30 days)
     // other options:
     // in the last week = time() - 604800
@@ -65,7 +65,7 @@ class local_orvsd_siteinfo_external extends external_api {
 
       // teachers = regular and non-editing teachers
       $teachers = local_orvsd_siteinfo_external::user_count("teacher",null);
-      
+
       $courselist_string = orvsd_siteinfo_courselist();
 
       $sinfo = new stdClass();
@@ -75,7 +75,7 @@ class local_orvsd_siteinfo_external extends external_api {
       $sinfo->sitetype     = "moodle";
       $sinfo->siteversion  = $CFG->version;
       $sinfo->siterelease  = $CFG->release;
-      $sinfo->location     = php_uname('n'); 
+      $sinfo->location     = php_uname('n');
       $sinfo->adminemail   = $CFG->supportemail;
       $sinfo->totalusers   = local_orvsd_siteinfo_external::user_count(null, null);
       $sinfo->adminusers   = intval($CFG->siteadmins);
@@ -138,7 +138,7 @@ class local_orvsd_siteinfo_external extends external_api {
                 $where";
 
       } else {
-        $sql = "SELECT COUNT(*) 
+        $sql = "SELECT COUNT(*)
                   FROM mdl_user
                  WHERE mdl_user.deleted = 0
                  AND mdl_user.confirmed = 1
