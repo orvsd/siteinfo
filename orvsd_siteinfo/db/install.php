@@ -30,6 +30,5 @@ function xmldb_local_orvsd_siteinfo_install() {
 
     ("$CFG->dirroot/local/orvsd_siteinfo/lib.php");
 
-    orvsd_siteinfo_init_db();
     return true;
 }
