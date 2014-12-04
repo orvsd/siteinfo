@@ -31,8 +31,6 @@ class local_orvsd_siteinfo_external extends external_api {
     global $CFG, $USER, $DB;
     $datetime *= 86400; // 86400 seconds per day
 
-    // Include the coursecat methods for creating the category
-    require_once($CFG->libdir.'/coursecatlib.php');
     $sinfo = null;
 
     $param_array = array(
