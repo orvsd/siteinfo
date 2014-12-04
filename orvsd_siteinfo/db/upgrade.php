@@ -25,8 +25,14 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-function xmldb_local_orvsd_sineinfo_upgrade($oldversion = 0) {
-    global $CFG, $DB;
+function xmldb_local_orvsd_siteinfo_upgrade($oldversion = 0) {
+    global $DB;
+
+    try {
+        $DB->delete_records('siteinfo');
+    } catch (Exception $e) {
+        // Do nothing, continue to return true
+    }
 
     return true;
 }
