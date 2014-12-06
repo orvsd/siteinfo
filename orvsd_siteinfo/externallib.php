@@ -63,7 +63,15 @@ class local_orvsd_siteinfo_external extends external_api {
         'adminemail' => new external_value(PARAM_RAW, "adminemail"),
         'totalusers' => new external_value(PARAM_INT, "totalusers"),
         'adminusers' => new external_value(PARAM_INT, "adminusers"),
-        'adminlist' => new external_value(PARAM_RAW, "adminlist"),
+        'adminlist' => new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    "firstname" => new external_value(PARAM_RAW, "firstname"),
+                    "lastname" => new external_value(PARAM_RAW, "lastname"),
+                    "email" => new external_value(PARAM_RAW, "email")
+                )
+            )
+        ),
         'teachers' => new external_value(PARAM_RAW, "teachers"),
         'activeusers' => new external_value(PARAM_INT, "activeusers"),
         'totalcourses' => new external_value(PARAM_INT, "totalcourses"),
