@@ -26,6 +26,70 @@
 defined('MOODLE_INTERNAL') || die;
 
 /**
+ *
+ * Look for a siteadmin token, if it doesn't exist, generate one
+ *
+ * Returns nothing
+ */
+function orvsd_siteinfo_generate_token() {
+    global $CFG, $DB;
+
+    // Look up the service, if it doesn't exist, create it
+    $service = $DB->get_record(
+        'external_services',
+        array('component'=>'local_orvsd_siteinfo')
+    );
+
+    if (!$service) {
+        $tmp = $DB->get_records_sql(
+            'SHOW TABLE STATUS WHERE name = "mdl_external_services"'
+        );
+        $service_id = $tmp['mdl_external_services']->auto_increment;
+
+        $service = new stdClass();
+        $service->id = $service_id;
+    }
+
+    // Check for a token associated to the siteadmin, if none exists, generate
+    $admin = $DB->get_record_sql(
+        "SELECT value FROM `mdl_config` WHERE `name` LIKE 'siteadmins'",
+        null,
+        IGNORE_MISSING
+    );
+
+    $admin_user = $DB->get_record('user', array('id' => "$admin->value"));
+    $existing_tokens = $DB->get_record(
+        'external_tokens',
+        array(
+            'userid' => $admin_user->id,
+            'externalserviceid' => $service->id
+        )
+    );
+
+    if (!$existing_tokens) {
+        require('config.php');
+        require_once("$CFG->libdir/externallib.php");
+
+        // Generate a new token for the Admin User
+        $token = external_generate_token(
+            EXTERNAL_TOKEN_PERMANENT,
+            $service,
+            $admin_user->id,
+            context_system::instance(),
+            $validuntil=0,
+            $IP_RESTRICTION
+        );
+
+        $DB->set_field(
+            'external_tokens',
+            'creatorid',
+            "$admin_user->id",
+            array("token"=>"$token")
+        );
+    }
+}
+
+/**
  * Get the comma-delimited array of users on the admin list.
  * The list includes first name, last name, and email-address.
  *
