@@ -59,6 +59,7 @@ class local_orvsd_siteinfo_external extends external_api {
         'sitename' => new external_value(PARAM_RAW, "sitename"),
         'sitetype' => new external_value(PARAM_RAW, "sitetype", VALUE_DEFAULT, "moodle"),
         'siteversion' => new external_value(PARAM_RAW, "siteversion"),
+        'siterelease' => new external_value(PARAM_RAW, "siterelease"),
         'location' => new external_value(PARAM_RAW, "location"),
         'adminemail' => new external_value(PARAM_RAW, "adminemail"),
         'totalusers' => new external_value(PARAM_INT, "totalusers"),
