@@ -44,7 +44,7 @@ class local_orvsd_siteinfo_external extends external_api {
         $params = self::validate_parameters(self::siteinfo_parameters(), $param_array);
 
         //Context validation
-        $context = get_context_instance(CONTEXT_USER, $USER->id);
+        $context = context_user::instance($USER->id);
         self::validate_context($context);
 
         // timeframe - default is within the last month,
@@ -180,8 +180,6 @@ class local_orvsd_siteinfo_external extends external_api {
                     $where";
         }
 
-        $count = $DB->count_records_sql($sql, null);
-
-        return intval($count);
+        return $DB->count_records_sql($sql, null);
     }
 }
