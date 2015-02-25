@@ -116,6 +116,10 @@ class local_orvsd_siteinfo_external extends external_api {
 
     /**
      * Count users
+     *
+     * @param role user type to count
+     * @param timeframe limit by activity date
+     *
      * @return int
      */
     private static function user_count($role="none", $timeframe=null) {
