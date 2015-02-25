@@ -95,7 +95,7 @@ class local_orvsd_siteinfo_external extends external_api {
         global $CFG, $SITE;
 
         // teachers = regular and non-editing teachers
-        $teachers = local_orvsd_siteinfo_external::user_count("teacher",null);
+        $teachers = orvsd_siteinfo_user_count("teacher",null);
 
         $courselist_string = orvsd_siteinfo_courselist();
 
@@ -107,11 +107,11 @@ class local_orvsd_siteinfo_external extends external_api {
         $sinfo['siteversion']  = $CFG->version;
         $sinfo['siterelease']  = $CFG->release;
         $sinfo['location']     = php_uname('n');
-        $sinfo['totalusers']   = local_orvsd_siteinfo_external::user_count(null, null);
+        $sinfo['totalusers']   = orvsd_siteinfo_user_count();
         $sinfo['adminusers']   = intval($CFG->siteadmins);
         $sinfo['adminlist']    = orvsd_siteinfo_get_admin_list();
         $sinfo['teachers']     = $teachers;
-        $sinfo['activeusers']  = local_orvsd_siteinfo_external::user_count(null, $timeframe);
+        $sinfo['activeusers']  = orvsd_siteinfo_user_count(null, $timeframe);
         $sinfo['totalcourses'] = count($courselist_string);
         $sinfo['courses']      = $courselist_string;
         $sinfo['timemodified'] = time();
@@ -119,67 +119,4 @@ class local_orvsd_siteinfo_external extends external_api {
         return $sinfo;
     }
 
-
-    /**
-     * Count users
-     *
-     * @param role user type to count
-     * @param timeframe limit by activity date
-     *
-     * @return int
-     */
-    private static function user_count($role="none", $timeframe=null) {
-        global $CFG, $DB;
-
-        switch ($role) {
-            case "teacher":
-                $role_condition = "IN (3,4)";
-                break;
-            case "manager":
-                $role_condition = "= 1";
-                break;
-            case "course_creator":
-                $role_condition = "= 2";
-                break;
-            case "student":
-                $role_condition = "= 5";
-                break;
-            case "guest":
-                $role_condition = "= 6";
-                break;
-            case "authed":
-                $role_condition = "= 7";
-                break;
-            case "frontpage":
-                $role_condition = "= 8";
-                break;
-            default:
-                $role = false;
-        }
-
-        $where = '';
-        if ($timeframe) {
-            //sql += (append WHERE clause to sql to limit by activity date)
-            $where = "AND mdl_user.lastaccess > $timeframe";
-        }
-
-        $sql = "SELECT COUNT(*)
-                FROM mdl_user
-                WHERE mdl_user.deleted = 0
-                AND mdl_user.confirmed = 1
-                $where";
-
-        if($role) {
-            $sql = "SELECT COUNT(DISTINCT userid)
-                    FROM mdl_role_assignments
-                    LEFT JOIN mdl_user
-                    ON mdl_user.id = mdl_role_assignments.userid
-                    WHERE mdl_user.deleted = 0
-                    AND mdl_user.confirmed = 1
-                    AND mdl_role_assignments.roleid $role_condition
-                    $where";
-        }
-
-        return $DB->count_records_sql($sql, null);
-    }
 }

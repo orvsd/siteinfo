@@ -117,68 +117,68 @@ function orvsd_siteinfo_get_admin_list() {
     return $result;
 }
 
-
 /**
  * Count users
+ *
+ * @param role user type to count
+ * @param timeframe limit by activity date
+ *
  * @return int
  */
-function orvsd_siteinfo_usercount($role="none", $timeframe=null) {
-    global $CFG, $DB;
+function orvsd_siteinfo_user_count($role="none", $timeframe=null) {
+    global $DB;
 
     switch ($role) {
-      case "teacher":
-        $role_condition = "IN (3,4)";
-        break;
-      case "manager":
-        $role_condition = "= 1";
-        break;
-      case "course_creator":
-        $role_condition = "= 2";
-        break;
-      case "student":
-        $role_condition = "= 5";
-        break;
-      case "guest":
-        $role_condition = "= 6";
-        break;
-      case "authed":
-        $role_condition = "= 7";
-        break;
-      case "frontpage":
-        $role_condition = "= 8";
-        break;
-      default:
-        $role = false;
+        case "teacher":
+            $role_condition = "IN (3,4)";
+            break;
+        case "manager":
+            $role_condition = "= 1";
+            break;
+        case "course_creator":
+            $role_condition = "= 2";
+            break;
+        case "student":
+            $role_condition = "= 5";
+            break;
+        case "guest":
+            $role_condition = "= 6";
+            break;
+        case "authed":
+            $role_condition = "= 7";
+            break;
+        case "frontpage":
+            $role_condition = "= 8";
+            break;
+        default:
+            $role = false;
     }
 
+    $where = '';
     if ($timeframe) {
-      //sql += (append WHERE clause to sql to limit by activity date)
-      $where = "AND mdl_user.lastaccess > $timeframe";
-    } else {
-      $where = '';
+        //sql += (append WHERE clause to sql to limit by activity date)
+        $where = "AND mdl_user.lastaccess > $timeframe";
     }
+
+    $sql = "SELECT COUNT(*)
+            FROM mdl_user
+            WHERE mdl_user.deleted = 0
+            AND mdl_user.confirmed = 1
+            $where";
 
     if($role) {
-      $sql = "SELECT COUNT(DISTINCT userid)
-              FROM mdl_role_assignments
-              LEFT JOIN mdl_user
-              ON mdl_user.id = mdl_role_assignments.userid
-              WHERE mdl_role_assignments.roleid $role_condition
-              $where";
-
-    } else {
-      $sql = "SELECT COUNT(*)
-                FROM mdl_user
-               WHERE mdl_user.deleted = 0
-               AND mdl_user.confirmed = 1
-               $where";
+        $sql = "SELECT COUNT(DISTINCT userid)
+                FROM mdl_role_assignments
+                LEFT JOIN mdl_user
+                ON mdl_user.id = mdl_role_assignments.userid
+                WHERE mdl_user.deleted = 0
+                AND mdl_user.confirmed = 1
+                AND mdl_role_assignments.roleid $role_condition
+                $where";
     }
 
-    $count = $DB->count_records_sql($sql, null);
-
-    return intval($count);
+    return $DB->count_records_sql($sql, null);
 }
-
 
 /**
  * generate list of courses installed here
