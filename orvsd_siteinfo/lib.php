@@ -218,15 +218,21 @@ function orvsd_siteinfo_courselist() {
  * @return array
  */
 function orvsd_siteinfo_get_enrolments($courseid) {
-  global $CFG, $DB;
+    global $DB;
 
-  $sql = "select count(userid)
-          from mdl_enrol
-          left join mdl_user_enrolments
-            on mdl_user_enrolments.enrolid=mdl_enrol.id
-          where mdl_enrol.roleid=5
-          and mdl_enrol.courseid=$courseid";
+    // Consistantly select the role id known as student
+    $student_role_id = $DB->get_field_sql(
+        "SELECT id FROM mdl_role WHERE archetype = ?",
+        array('student')
+    );
 
-  $params = null;
-  return $DB->get_field_sql($sql,$params, IGNORE_MISSING);
+    $sql = "SELECT COUNT(userid)
+            FROM mdl_enrol
+            LEFT JOIN mdl_user_enrolments
+            ON mdl_user_enrolments.enrolid=mdl_enrol.id
+            WHERE mdl_enrol.roleid=$student_role_id
+            AND mdl_enrol.courseid=$courseid";
+
+    $params = null;
+    return $DB->get_field_sql($sql,$params, IGNORE_MISSING);
 }
