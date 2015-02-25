@@ -203,7 +203,7 @@ function orvsd_siteinfo_courselist() {
         $course_list[] = array(
             "serial"=>$course->serial,
             "shortname"=>htmlentities($shortname),
-            "enrolled"=>(string)$enrolled
+            "enrolled"=>$enrolled
         );
     }
 
@@ -233,6 +233,5 @@ function orvsd_siteinfo_get_enrolments($courseid) {
             WHERE mdl_enrol.roleid=$student_role_id
             AND mdl_enrol.courseid=$courseid";
 
-    $params = null;
-    return $DB->get_field_sql($sql,$params, IGNORE_MISSING);
+    return (string)$DB->count_records_sql($sql);
 }
