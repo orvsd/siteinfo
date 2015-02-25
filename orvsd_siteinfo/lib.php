@@ -185,30 +185,29 @@ function orvsd_siteinfo_user_count($role="none", $timeframe=null) {
  * @return array
  */
 function orvsd_siteinfo_courselist() {
-  global $CFG, $DB;
-  // get all course idnumbers
-  $table = 'coursemeta';
-  $conditions = null;
-  $params = null;
-  $sort = 'courseid';
-  $fields = 'courseid,shortname,serial';
-  $courses = $DB->get_records($table,$conditions,$sort,$fields);
+    global $DB;
+    // get all course idnumbers
+    $table = 'coursemeta';
+    $conditions = null;
+    $params = null;
+    $sort = 'courseid';
+    $fields = 'courseid,shortname,serial';
+    $courses = $DB->get_records($table,$conditions,$sort,$fields);
 
-  $course_list = array();
-  foreach($courses as $course) {
-      $shortname = preg_replace('/"/', '', $course->shortname);
-      $shortname = preg_replace("/'/", " ", $shortname);
-      $enrolled = orvsd_siteinfo_get_enrolments($course->courseid);
-      $course_list[] = '{"serial":"' . $course->serial .
-                        '","shortname":"' . htmlentities($shortname) .
-                        '","enrolled":' . $enrolled . '}';
-  }
-
-    $courselist_string = '';
-
-    if (count($course_list) > 0) {
-     $courselist_string = "[" . implode(',', $course_list) . "]";
+    //$course_list = json_encode($courses);
+    $course_list = array();
+    foreach($courses as $course) {
+        $shortname = preg_replace('/"/', '', $course->shortname);
+        $shortname = preg_replace("/'/", " ", $shortname);
+        $enrolled = orvsd_siteinfo_get_enrolments($course->courseid);
+        $course_list[] = array(
+            "serial"=>$course->serial,
+            "shortname"=>htmlentities($shortname),
+            "enrolled"=>(string)$enrolled
+        );
     }
+
+    $courselist_string = json_encode($course_list);
 
     return $courselist_string;
 }
