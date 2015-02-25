@@ -147,31 +147,31 @@ class local_orvsd_siteinfo_external extends external_api {
           $role = false;
         }
 
-      if ($timeframe) {
-        //sql += (append WHERE clause to sql to limit by activity date)
-        $where = "AND mdl_user.lastaccess > $timeframe";
-      } else {
         $where = '';
-      }
+        if ($timeframe) {
+            //sql += (append WHERE clause to sql to limit by activity date)
+            $where = "AND mdl_user.lastaccess > $timeframe";
+        }
 
-      if($role) {
-        $sql = "SELECT COUNT(DISTINCT userid)
-                FROM mdl_role_assignments
-                LEFT JOIN mdl_user
-                ON mdl_user.id = mdl_role_assignments.userid
-                WHERE mdl_role_assignments.roleid $role_condition
+        $sql = "SELECT COUNT(*)
+                FROM mdl_user
+                WHERE mdl_user.deleted = 0
+                AND mdl_user.confirmed = 1
                 $where";
 
-      } else {
-        $sql = "SELECT COUNT(*)
-                  FROM mdl_user
-                 WHERE mdl_user.deleted = 0
-                 AND mdl_user.confirmed = 1
-                 $where";
-      }
+        if($role) {
+            $sql = "SELECT COUNT(DISTINCT userid)
+                    FROM mdl_role_assignments
+                    LEFT JOIN mdl_user
+                    ON mdl_user.id = mdl_role_assignments.userid
+                    WHERE mdl_user.deleted = 0
+                    AND mdl_user.confirmed = 1
+                    AND mdl_role_assignments.roleid $role_condition
+                    $where";
+        }
 
-      $count = $DB->count_records_sql($sql, null);
+        $count = $DB->count_records_sql($sql, null);
 
-      return intval($count);
-  }
+        return intval($count);
+    }
 }
