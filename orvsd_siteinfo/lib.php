@@ -50,14 +50,7 @@ function orvsd_siteinfo_generate_token() {
         $service->id = $service_id;
     }
 
-    // Check for a token associated to the siteadmin, if none exists, generate
-    $admin = $DB->get_record_sql(
-        "SELECT value FROM `mdl_config` WHERE `name` LIKE 'siteadmins'",
-        null,
-        IGNORE_MISSING
-    );
-
-    $admin_user = $DB->get_record('user', array('id' => "$admin->value"));
+    $admin_user = $DB->get_record('user', array('username' => "admin"));
     $existing_tokens = $DB->get_record(
         'external_tokens',
         array(
@@ -83,7 +76,7 @@ function orvsd_siteinfo_generate_token() {
         $DB->set_field(
             'external_tokens',
             'creatorid',
-            "$admin_user->id",
+            $admin_user->id,
             array("token"=>"$token")
         );
     }
