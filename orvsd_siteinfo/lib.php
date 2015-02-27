@@ -110,11 +110,21 @@ function orvsd_siteinfo_get_admin_list() {
             AND FIND_IN_SET(mdl_user.id, mdl_config.value) > ?";
     $result = $DB->get_records_sql($sql, array('siteadmins', 0));
 
-    if (gettype($result) != "array") {
-        $result = [$result];
+    $result_array = object_to_array($result);
+
+    return $result_array;
+}
+
+function object_to_array($D) {
+    if (is_object($D)) {
+        $D = get_object_vars($D);
     }
 
-    return $result;
+    if (is_array($D)) {
+        return array_map(__FUNCTION__, $D);
+    }
+
+    return $D;
 }
 
 
